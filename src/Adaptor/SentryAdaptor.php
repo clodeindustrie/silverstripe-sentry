@@ -107,6 +107,10 @@ class SentryAdaptor
                 // set's the rate in which traces are sampled 1 is 100%, 0.1 is 10% etc
                 $options->setTracesSampleRate($data);
                 break;
+            case 'profiles_sample_rate':
+                // Depends on the traces_sample_rate above
+                $options->setProfilesSampleRate($data);
+                break;
             default:
                 break;
         }
@@ -168,6 +172,10 @@ class SentryAdaptor
             $opts['traces_sample_rate'] = $traces_sample_rate;
         }
 
+        if ($profiles_sample_rate = Env::getEnv('SENTRY_PROFILES_SAMPLE_RATE')) {
+            $opts['profiles_sample_rate'] = $profiles_sample_rate;
+        }
+
         // Env vars take precedence over YML config in array_merge()
         $optsConfig = Config::inst()->get(static::class, 'opts') ?? [];
 
@@ -189,19 +197,18 @@ class SentryAdaptor
         return $opts;
     }
 
-    public function startTransaction()
+    public function startTransaction($transactionName)
     {
         $hub = SentrySdk::getCurrentHub();
         $options = $hub->getClient()->getOptions();
         $rate = $options->getTracesSampleRate();
 
-        // create a new transaction and finish it to send the traces to sentry
         $samplingContext = DynamicSamplingContext::fromOptions($options, $this->getContext());
         $source = TransactionSource::url();
         $metadata = new TransactionMetadata($rate, $samplingContext, $source);
 
-        $transaction_context = new TransactionContext('Bong_3', null, $metadata);
-        $Transaction = $hub->startTransaction($transaction_context);
-        $Transaction->finish();
+        $transaction_context = new TransactionContext($transactionName, null, $metadata);
+        $transaction = $hub->startTransaction($transaction_context);
+        return $transaction;
     }
 }

@@ -70,6 +70,7 @@ class SentryLogger
         $tags = $logger->defaultTags();
         $extra = $logger->defaultExtra();
         $traces_sample_rate = $logger->defaultTracesSample();
+        $profiles_sample_rate = $logger->defaultProfilesSample();
 
         $user = [];
         $level = Logger::DEBUG;
@@ -81,6 +82,7 @@ class SentryLogger
             $user = $config['user'] ?? $user;
             $level = $config['level'] ?? $level;
             $traces_sample_rate = $config['traces_sample_rate'] ?? $traces_sample_rate;
+            $profiles_sample_rate = $config['profiles_sample_rate'] ?? $profiles_sample_rate;
         }
 
         $adaptor = (new SentryAdaptor($client))
@@ -88,15 +90,10 @@ class SentryLogger
             ->setContext('tags', $tags)
             ->setContext('extra', $extra)
             ->setContext('user', $user)
-            ->setContext('traces_sample_rate', $traces_sample_rate);
-
+            ->setContext('traces_sample_rate', $traces_sample_rate)
+            ->setContext('profiles_sample_rate', $profiles_sample_rate);
 
         $set_adaptor = $logger->setAdaptor($adaptor);
-
-        // trigger the performance tracing if set
-        if ($traces_sample_rate) {
-            $set_adaptor->getAdaptor()->startTransaction();
-        }
 
         return $set_adaptor;
     }
@@ -178,9 +175,19 @@ class SentryLogger
      *
      * @return array
      */
-    public function defaultTracesSample(): array
+    public function defaultTracesSample(): float
     {
-        return [];
+        return 0.0;
+    }
+
+    /**
+     * Returns a default empty array for profiles_sample_rate, as this should be blank if not set manually
+     *
+     * @return array
+     */
+    public function defaultProfilesSample(): float
+    {
+        return 0.0;
     }
 
     /**
