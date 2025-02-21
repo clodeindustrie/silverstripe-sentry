@@ -73,9 +73,6 @@ class SentryHandler extends AbstractProcessingHandler
 
         SentrySdk::setCurrentHub(new Hub($client));
 
-        $trace_sample_rate = SentryAdaptor::get_opts()['traces_sample_rate'] ?? null;
-        $config['traces_sample_rate'] = $trace_sample_rate ?: 0.0;
-
         $config['level'] = $level;
 
         $this->logger = SentryLogger::factory($client, $config);
@@ -133,7 +130,7 @@ class SentryHandler extends AbstractProcessingHandler
                 'stacktrace' => new Stacktrace(SentryLogger::backtrace($record)),
             ]);
         }
-        
+
         // Ref #65 This works around the fact that somewhere in the bowels of Sentry or Monolog,
         // we're managing to trigger the handler twice and send two messages, one of each kind.
         if (static::$counter > 0) {
