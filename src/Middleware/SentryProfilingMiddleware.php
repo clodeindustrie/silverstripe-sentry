@@ -33,13 +33,8 @@ class SentryProfilingMiddleware implements HTTPMiddleware
         )->getClient();
         SentrySdk::setCurrentHub(new Hub($client));
 
-        $traces_sample_rate =
-            SentryAdaptor::get_opts()["traces_sample_rate"] ?? null;
-        $config["traces_sample_rate"] = $traces_sample_rate ?: 0.0;
-
-        $profiles_sample_rate =
-            SentryAdaptor::get_opts()["profiles_sample_rate"] ?? null;
-        $config["profiles_sample_rate"] = $profiles_sample_rate ?: 0.0;
+        $config["traces_sample_rate"] = SentryAdaptor::get_opts()["traces_sample_rate"] ?? null;
+        $config["profiles_sample_rate"] = SentryAdaptor::get_opts()["profiles_sample_rate"] ?? null;
 
         $logger = SentryLogger::factory($client, $config);
         $transaction = $logger->adaptor->startTransaction(
