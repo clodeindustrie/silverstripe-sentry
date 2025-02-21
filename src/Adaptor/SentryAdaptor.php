@@ -104,7 +104,7 @@ class SentryAdaptor
                 });
                 break;
             case 'traces_sample_rate':
-                // set's the rate in which traces are sampled 1 is 100%, 0.1 is 10% etc
+                // sets the rate in which traces are sampled 1 is 100%, 0.1 is 10% etc
                 $options->setTracesSampleRate($data);
                 break;
             case 'profiles_sample_rate':
