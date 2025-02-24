@@ -169,11 +169,11 @@ class SentryAdaptor
         }
 
         if ($traces_sample_rate = Env::getEnv('SENTRY_TRACES_SAMPLE_RATE')) {
-            $opts['traces_sample_rate'] = $traces_sample_rate;
+            $opts['traces_sample_rate'] = (float)$traces_sample_rate;
         }
 
         if ($profiles_sample_rate = Env::getEnv('SENTRY_PROFILES_SAMPLE_RATE')) {
-            $opts['profiles_sample_rate'] = $profiles_sample_rate;
+            $opts['profiles_sample_rate'] = (float)$profiles_sample_rate;
         }
 
         // Env vars take precedence over YML config in array_merge()
