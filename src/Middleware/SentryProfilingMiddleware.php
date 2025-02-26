@@ -52,11 +52,18 @@ class SentryProfilingMiddleware implements HTTPMiddleware
 
     public function process(HTTPRequest $request, callable $delegate)
     {
-        if (!Director::is_cli()) {
+        $userAgent = $request->getHeader('user-agent') ?? '';
+        $userAgentBlacklist = Config::inst()->get(SentryAdaptor::class, 'user_agents_blacklist') ?? [];
+        $blacklisted = array_reduce($userAgentBlacklist, fn($acc, $ua) => !is_bool(strpos($userAgent, $ua)) || $acc, false);
+        $isProfilingEnabled = !Director::is_cli() && !$blacklisted;
+
+        if ($isProfilingEnabled) {
             $tx = $this->startTransaction($request);
         }
+
         $response = $delegate($request);
-        if (!Director::is_cli()) {
+
+        if ($isProfilingEnabled) {
             $tx->setHttpStatus($response->getStatusCode());
             $this->endTransaction($tx);
         }
